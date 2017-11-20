@@ -4,7 +4,9 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +23,8 @@ import com.google.zxing.common.BitMatrix;
 import com.lvrenyang.io.Canvas;
 import com.lvrenyang.io.Pos;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -34,6 +38,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button bt_print_text, bt_print_image, bt_print_report;
     Bitmap barcode, img;
     float yaxis = 0;
+
+    public static int nPrintWidth = 500;
+    public static int nPrintHeight = 600;
+    public static int nPrintContent = 0;
+    public static int nCompressMethod = 0;
+
     private static OutputStream outputStream;
     Pos mPos = BluetoothService.mPos;
     Canvas mCanvas = BluetoothService.mCanvas;
@@ -96,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     /***************CODE FOR PRINTING THROUGH CANVAS***************/
 
     private class TaskPrint1 implements Runnable {
-        com.lvrenyang.io.Canvas canvas = null;
+        Canvas canvas = null;
 
         public TaskPrint1(com.lvrenyang.io.Canvas canvas) {
             this.canvas = canvas;
@@ -119,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             });
         }
 
-        private boolean PrintTicket1(Context ctx, com.lvrenyang.io.Canvas canvas, int nPrintWidth, int nPrintHeight) {
+        private boolean PrintTicket1(Context ctx, Canvas canvas, int nPrintWidth, int nPrintHeight) {
             boolean bPrintResult = false;
 
             Typeface tfNumber = Typeface.createFromAsset(getAssets(), "fonts/DroidSansMono.ttf");
@@ -267,6 +277,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 yaxis = yaxis + textsize + 8;
             } else yaxis = yaxis + textsize + 6;
         }
+
+
     }
 
 
@@ -285,7 +297,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void run() {
             // TODO Auto-generated method stub
             // final boolean bPrintResult = PrintTicket();//57
-            final boolean bPrintResult = PrintTicket();
+            final boolean bPrintResult = PrintTicket(nPrintWidth, nCompressMethod);
             final boolean bIsOpened = pos.GetIO().IsOpened();
             runOnUiThread(new Runnable() {
                 @Override
@@ -301,12 +313,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         /**********DEMO printTicket1()****************/
-        public boolean PrintTicket() {
+        public boolean PrintTicket(int nPrintWidth , int nCompressMethod) {
             int total = 0;
             boolean bPrintResult = false;
             int maxlength = 47;
+
+
             pos.POS_FeedLine();
             pos.POS_S_Align(1);
+
+            /*************IMAGE PRINTING CODE*************/
+          /*  Bitmap bit = BitmapFactory.decodeResource(getResources(), R.drawable.motu);
+            pos.POS_PrintPicture(bit, nPrintWidth, 0 ,0);*/
+
+            /**************END OF IMAGE PRINT************/
+
 
             printText(aligncenter("Belgavi", 10));
             printText("(540038)");
@@ -547,5 +568,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         return null;
     }
+
+    public Bitmap getImageFromAssetsFile(String fileName) {
+        Bitmap image = null;
+        AssetManager am = getResources().getAssets();
+        try {
+            InputStream is = am.open(fileName);
+            image = BitmapFactory.decodeStream(is);
+            is.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return image;
+
+    }
+
+    /*************Bitmap convertion code*******************/
+
+
 
 }
