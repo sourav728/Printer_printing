@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Printer_printing</string>
+    <string name="printsuccess">Print Success</string>
+    <string name="printfailed">Print Failed</string>
+</resources>
